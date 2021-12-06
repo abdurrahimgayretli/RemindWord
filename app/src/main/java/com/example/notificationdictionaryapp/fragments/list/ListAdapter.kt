@@ -1,8 +1,11 @@
 package com.example.notificationdictionaryapp.fragments.list
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.example.notificationdictionaryapp.R
@@ -33,6 +36,7 @@ class ListAdapter: RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
             holder.itemView.findNavController().navigate(action)
         }
     }
+
 
     fun setData(word: List<Word>){
         this.wordList=word
