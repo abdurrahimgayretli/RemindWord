@@ -8,14 +8,11 @@ import android.os.Build
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.notificationdictionaryapp.R
 import com.example.notificationdictionaryapp.viewmodel.WordViewModel
 import kotlinx.android.synthetic.main.fragment_list.view.*
 import android.app.AlarmManager
@@ -23,25 +20,24 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 
 import android.content.Intent
-import android.icu.text.SimpleDateFormat
-import android.icu.util.Calendar
-import android.os.SystemClock
+import android.util.Log
+import com.example.notificationdictionaryapp.*
+import kotlinx.android.synthetic.main.fragment_list.*
 import com.example.notificationdictionaryapp.NotificationReceiver
-import com.example.notificationdictionaryapp.messageExtra
-import com.example.notificationdictionaryapp.titleExtra
-import java.util.*
-import android.R.string.no
+import com.example.notificationdictionaryapp.data.SettingDao
+import com.example.notificationdictionaryapp.data.SettingDataBase
+import com.example.notificationdictionaryapp.data.WordDataBase
+import com.example.notificationdictionaryapp.model.Setting
+import com.example.notificationdictionaryapp.model.Word
+import com.example.notificationdictionaryapp.viewmodel.SettingViewModel
 
 
-
-
-
-class ListFragment : Fragment() {
+class ListFragment : Fragment()  {
     private val CHANNEL_ID = "channel_id_notify_01"
     private  val notificationId = 42
     private  lateinit var mWordViewModel: WordViewModel
+    private  lateinit var mSettingViewModel: SettingViewModel
     val adapter = ListAdapter()
-    var notifyText = ""
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -53,15 +49,44 @@ class ListFragment : Fragment() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        mSettingViewModel = ViewModelProvider(this).get(SettingViewModel::class.java)
+
         mWordViewModel = ViewModelProvider(this).get(WordViewModel::class.java)
         mWordViewModel.readAllData.observe(viewLifecycleOwner, Observer{ word ->
             adapter.setData(word)
         })
-        notifyText = mWordViewModel.readAllData.value?.get(0)?.englishWord + " = " + mWordViewModel.readAllData.value?.get(0)?.turkishWord
+
         view.floatingActionButton.setOnClickListener{
             findNavController().navigate(R.id.action_listFragment_to_addFragment)
         }
-        view.button.setOnClickListener {scheduleNotification() }
+        val settingDb= SettingDataBase.getDatabase(requireContext())
+        val settingDao = settingDb.settingDao()
+        var data = settingDao.findByKey("Notification")
+        Log.d("list",data.toString())
+        if(data.equals(null)){
+            val Setting = Setting(0,"Notification","False")
+            mSettingViewModel.addSetting(Setting)
+            data = settingDao.findByKey("Notification")
+        }
+        if(data.value == "True"){
+            view.floatingAlarmButton.setImageResource(R.drawable.ic_baseline_alarm_off_24)
+        }
+
+        view.floatingAlarmButton.setOnClickListener {
+            if(data.value == "False"){
+                settingDao.updateByKey(data.key,"True")
+                floatingAlarmButton.setImageResource(R.drawable.ic_baseline_alarm_off_24)
+                Schdedulenotification()
+            }
+            else if (data.value == "True"){
+                settingDao.updateByKey(data.key,"False")
+                floatingAlarmButton.setImageResource(R.drawable.ic_baseline_alarm_on_24)
+                cancelNotification()
+            }
+            data = settingDao.findByKey("Notification")
+            Log.d("list",data.toString())
+        }
+
         setHasOptionsMenu(true)
         return view
     }
@@ -75,28 +100,17 @@ class ListFragment : Fragment() {
         }
         return super.onOptionsItemSelected(item)
     }
-    private  fun sendNotification(){
-        val builder = NotificationCompat.Builder(requireContext(),CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("Notify Title")
-            .setContentText(notifyText)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        with(NotificationManagerCompat.from(requireContext())){
-            notify(notificationId,builder.build())
-        }
-
-    }
-    fun scheduleNotification() {
+    fun Schdedulenotification(){
         val intent = Intent(requireContext(), NotificationReceiver::class.java)
-        intent.putExtra(titleExtra,"title")
-        intent.putExtra(messageExtra, mWordViewModel.readAllData.value?.get(0)?.englishWord + " = " + mWordViewModel.readAllData.value?.get(0)?.turkishWord)
-        val pending =
-            PendingIntent.getBroadcast(requireContext(), notificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-
+        intent.putExtra(titleExtra,"Dictionarty")
+        val pending = PendingIntent.getBroadcast(requireContext(), notificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         // Schdedule notification
         val manager = requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        manager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60000, pending);
+        manager.setInexactRepeating(AlarmManager.RTC,System.currentTimeMillis(), 60000, pending)
+
     }
+
+
     private  fun createNotificationChannel(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Notification Title"
@@ -110,16 +124,15 @@ class ListFragment : Fragment() {
             notificationManager.createNotificationChannel(channel)
         }
     }
-    fun cancelNotification() {
-        val intent = Intent(requireContext(), NotificationReceiver::class.java)
-        intent.putExtra("title", "title")
-        intent.putExtra("text", notifyText)
+
+    fun cancelNotification(){
+        val intent = Intent(context, NotificationReceiver::class.java)
         val pending =
-            PendingIntent.getBroadcast(requireContext(), notificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-        // Cancel notification
-        val manager = requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            PendingIntent.getBroadcast(context, notificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val manager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
         manager.cancel(pending)
     }
+
     private fun deleteAllWords() {
         val builder = AlertDialog.Builder(requireContext())
         builder.setPositiveButton("Yes"){_,_ ->
@@ -132,4 +145,5 @@ class ListFragment : Fragment() {
         builder.setMessage("Are you sure you want to delete everything")
         builder.create().show()
     }
+
 }
