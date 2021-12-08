@@ -4,16 +4,16 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.notificationdictionaryapp.model.Word
+import com.example.notificationdictionaryapp.model.Setting
 
-@Database(entities = [Word::class], version = 1,exportSchema = false)
-abstract class WordDataBase: RoomDatabase(){
-    abstract fun wordDao(): WordDao
+@Database(entities = [Setting::class], version = 1,exportSchema = false)
+abstract class SettingDataBase: RoomDatabase(){
+    abstract fun settingDao(): SettingDao
     companion object{
         @Volatile
-        private var INSTANCE: WordDataBase? = null
+        private var INSTANCE: SettingDataBase? = null
 
-        fun getDatabase(context: Context): WordDataBase{
+        fun getDatabase(context: Context): SettingDataBase{
             val tempInstance = INSTANCE
             if(tempInstance != null){
                 return tempInstance
@@ -21,8 +21,8 @@ abstract class WordDataBase: RoomDatabase(){
             synchronized(this){
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
-                    WordDataBase::class.java,
-                    "word_database"
+                    SettingDataBase::class.java,
+                    "setting_database"
                 ).allowMainThreadQueries()
                     .build()
                 INSTANCE = instance

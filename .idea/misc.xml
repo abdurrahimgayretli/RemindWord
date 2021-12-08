@@ -5,9 +5,12 @@
       <map>
         <entry key="..\:/Users/abdur/AndroidStudioProjects/NotificationDictionaryApp/app/src/main/res/drawable/delete_menu.xml" value="0.18981481481481483" />
         <entry key="..\:/Users/abdur/AndroidStudioProjects/NotificationDictionaryApp/app/src/main/res/drawable/ic_baseline_delete_24.xml" value="0.2153846153846154" />
+        <entry key="..\:/Users/abdur/AndroidStudioProjects/NotificationDictionaryApp/app/src/main/res/layout-qwerty/custom_row1.xml" value="0.8149882903981265" />
         <entry key="..\:/Users/abdur/AndroidStudioProjects/NotificationDictionaryApp/app/src/main/res/layout/activity_main.xml" value="0.2667572463768116" />
-        <entry key="..\:/Users/abdur/AndroidStudioProjects/NotificationDictionaryApp/app/src/main/res/layout/custom_row.xml" value="0.25" />
+        <entry key="..\:/Users/abdur/AndroidStudioProjects/NotificationDictionaryApp/app/src/main/res/layout/custom_row.xml" value="0.33" />
         <entry key="..\:/Users/abdur/AndroidStudioProjects/NotificationDictionaryApp/app/src/main/res/layout/fragment_add.xml" value="0.33" />
+        <entry key="..\:/Users/abdur/AndroidStudioProjects/NotificationDictionaryApp/app/src/main/res/layout/fragment_item.xml" value="0.3484375" />
+        <entry key="..\:/Users/abdur/AndroidStudioProjects/NotificationDictionaryApp/app/src/main/res/layout/fragment_item_list.xml" value="0.3625" />
         <entry key="..\:/Users/abdur/AndroidStudioProjects/NotificationDictionaryApp/app/src/main/res/layout/fragment_list.xml" value="0.33" />
         <entry key="..\:/Users/abdur/AndroidStudioProjects/NotificationDictionaryApp/app/src/main/res/layout/fragment_notification.xml" value="0.203125" />
         <entry key="..\:/Users/abdur/AndroidStudioProjects/NotificationDictionaryApp/app/src/main/res/layout/fragment_update.xml" value="0.25" />

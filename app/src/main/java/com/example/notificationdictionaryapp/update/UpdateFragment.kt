@@ -56,6 +56,7 @@ class UpdateFragment : Fragment() {
                 // Model couldn’t be downloaded or other internal error.
                 // ...
             }
+
         view.updateAddWordText.setText(args.currentWord.englishWord)
 
         view.updateTranslateWordButton.setOnClickListener{ translateWord() }

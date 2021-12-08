@@ -21,4 +21,7 @@ interface WordDao {
 
     @Query("SELECT * FROM word_table ORDER BY id ASC")
     fun  readAllData(): LiveData<List<Word>>
+
+    @Query("SELECT * FROM word_table ORDER BY id ASC")
+    fun  getAll(): List<Word>
 }
