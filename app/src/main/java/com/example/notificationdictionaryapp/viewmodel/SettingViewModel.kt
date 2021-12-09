@@ -16,7 +16,7 @@ class SettingViewModel(application: Application): AndroidViewModel(application) 
     private val repository: SettingRepository
 
     init{
-        val settingDao = SettingDataBase.getDatabase(application).settingDao()
+        val settingDao = SettingDataBase.getInstance(application).settingDao()
         repository = SettingRepository(settingDao)
         readAllData = repository.readAllData
     }

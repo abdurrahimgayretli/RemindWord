@@ -30,4 +30,7 @@ interface SettingDao {
 
     @Query("UPDATE setting_table SET value = :value WHERE `key` = :key")
     fun updateByKey(key:String,value:String)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insert(setting: Setting)
 }

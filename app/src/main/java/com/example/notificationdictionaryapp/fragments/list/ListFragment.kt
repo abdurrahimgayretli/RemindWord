@@ -1,8 +1,6 @@
 package com.example.notificationdictionaryapp.fragments.list
 
-import android.app.AlertDialog
-import android.app.NotificationChannel
-import android.app.NotificationManager
+import android.app.*
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
@@ -15,20 +13,16 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.notificationdictionaryapp.viewmodel.WordViewModel
 import kotlinx.android.synthetic.main.fragment_list.view.*
-import android.app.AlarmManager
-
-import android.app.PendingIntent
 
 import android.content.Intent
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
+import androidx.core.view.isVisible
 import com.example.notificationdictionaryapp.*
 import kotlinx.android.synthetic.main.fragment_list.*
 import com.example.notificationdictionaryapp.NotificationReceiver
-import com.example.notificationdictionaryapp.data.SettingDao
 import com.example.notificationdictionaryapp.data.SettingDataBase
-import com.example.notificationdictionaryapp.data.WordDataBase
 import com.example.notificationdictionaryapp.model.Setting
-import com.example.notificationdictionaryapp.model.Word
 import com.example.notificationdictionaryapp.viewmodel.SettingViewModel
 
 
@@ -37,6 +31,7 @@ class ListFragment : Fragment()  {
     private  val notificationId = 42
     private  lateinit var mWordViewModel: WordViewModel
     private  lateinit var mSettingViewModel: SettingViewModel
+    var interval = "15"
     val adapter = ListAdapter()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -59,7 +54,7 @@ class ListFragment : Fragment()  {
         view.floatingActionButton.setOnClickListener{
             findNavController().navigate(R.id.action_listFragment_to_addFragment)
         }
-        val settingDb= SettingDataBase.getDatabase(requireContext())
+        val settingDb= SettingDataBase.getInstance(requireContext())
         val settingDao = settingDb.settingDao()
         var data = settingDao.findByKey("Notification")
         Log.d("list",data.toString())
@@ -74,19 +69,53 @@ class ListFragment : Fragment()  {
 
         view.floatingAlarmButton.setOnClickListener {
             if(data.value == "False"){
-                settingDao.updateByKey(data.key,"True")
-                floatingAlarmButton.setImageResource(R.drawable.ic_baseline_alarm_off_24)
-                Schdedulenotification()
+                intervalOkButton.isVisible = true
+                intervalText.isVisible = true
+                intervalCloseButton.isVisible = true
             }
             else if (data.value == "True"){
                 settingDao.updateByKey(data.key,"False")
                 floatingAlarmButton.setImageResource(R.drawable.ic_baseline_alarm_on_24)
                 cancelNotification()
+                Toast.makeText(requireContext(), "Successfully removed notification!", Toast.LENGTH_SHORT).show()
             }
             data = settingDao.findByKey("Notification")
-            Log.d("list",data.toString())
         }
-
+        view.intervalOkButton.setOnClickListener{
+            if(!intervalText.text.isEmpty()){
+                settingDao.updateByKey(data.key,"True")
+                intervalText.isVisible = false
+                intervalCloseButton.isVisible = false
+                intervalOkButton.isVisible = false
+                interval = intervalText.text.toString()
+                floatingAlarmButton.setImageResource(R.drawable.ic_baseline_alarm_off_24)
+                Schdedulenotification()
+                val imm: InputMethodManager =
+                    requireActivity().getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+                var view2 = requireActivity().currentFocus
+                if (view2 == null) {
+                    view2 = View(activity)
+                }
+                imm.hideSoftInputFromWindow(view.windowToken, 0)
+                data = settingDao.findByKey("Notification")
+                Toast.makeText(requireContext(), "Successfully created notification!", Toast.LENGTH_SHORT).show()
+            }
+            else{
+                Toast.makeText(requireContext(), "Please fill out field.", Toast.LENGTH_SHORT).show()
+            }
+        }
+        view.intervalCloseButton.setOnClickListener{
+            intervalText.isVisible = false
+            intervalCloseButton.isVisible = false
+            intervalOkButton.isVisible = false
+            val imm: InputMethodManager =
+                requireActivity().getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+            var view1 = requireActivity().currentFocus
+            if (view1 == null) {
+                view1 = View(activity)
+            }
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
         setHasOptionsMenu(true)
         return view
     }
@@ -106,7 +135,8 @@ class ListFragment : Fragment()  {
         val pending = PendingIntent.getBroadcast(requireContext(), notificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         // Schdedule notification
         val manager = requireActivity().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        manager.setInexactRepeating(AlarmManager.RTC,System.currentTimeMillis(), 60000, pending)
+        manager.setInexactRepeating(AlarmManager.RTC,System.currentTimeMillis(),
+            (60000 * interval.toInt()).toLong(), pending)
 
     }
 
