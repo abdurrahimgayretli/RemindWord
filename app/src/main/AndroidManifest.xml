@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.notificationdictionaryapp">
+    package="com.negotium.remindword">
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     <application
         android:allowBackup="true"
@@ -8,12 +8,12 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.NotificationDictionaryApp">
+        android:theme="@style/Theme.RemindWord">
         <receiver
-            android:name=".NotificationReceiver"
+            android:name="com.negotium.remindword.NotificationReceiver"
             android:enabled="true" />
         <activity
-            android:name=".MainActivity"
+            android:name="com.negotium.remindword.MainActivity"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

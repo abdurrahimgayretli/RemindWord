@@ -9,7 +9,7 @@ android {
     buildToolsVersion "30.0.0"
 
     defaultConfig {
-        applicationId "com.example.notificationdictionaryapp"
+        applicationId "com.negotium.remindword"
         minSdkVersion 24
         targetSdkVersion 29
         versionCode 1
