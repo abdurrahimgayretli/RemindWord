@@ -57,7 +57,6 @@ class ListFragment : Fragment()  {
         val settingDb= SettingDataBase.getInstance(requireContext())
         val settingDao = settingDb.settingDao()
         var data = settingDao.findByKey("Notification")
-        Log.d("list",data.toString())
         if(data.equals(null)){
             val Setting = Setting(0,"Notification","False")
             mSettingViewModel.addSetting(Setting)
@@ -120,6 +119,7 @@ class ListFragment : Fragment()  {
             imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
         setHasOptionsMenu(true)
+
         return view
     }
 

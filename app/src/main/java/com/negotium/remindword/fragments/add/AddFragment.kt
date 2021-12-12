@@ -19,12 +19,8 @@ import com.google.mlkit.nl.translate.TranslatorOptions
 import kotlinx.android.synthetic.main.fragment_add.*
 import kotlinx.android.synthetic.main.fragment_add.view.*
 import android.app.Activity
-import android.graphics.drawable.Drawable
-import android.util.Log
 import android.view.inputmethod.InputMethodManager
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import androidx.core.view.get
 import com.google.mlkit.nl.translate.Translator
 import com.jwang123.flagkit.FlagKit
 
@@ -32,11 +28,11 @@ import com.jwang123.flagkit.FlagKit
 class AddFragment : Fragment() {
 
     private lateinit var conditions: DownloadConditions
-    private lateinit var englishTurkishTranslator: Translator
+    private lateinit var translator: Translator
     private lateinit var options: TranslatorOptions
     private lateinit var mWordViewModel: WordViewModel
-    var trWordString = ""
-    var enWordString = ""
+    var fromWordString = ""
+    var toWordString = ""
 
 
     override fun onCreateView(
@@ -90,11 +86,11 @@ class AddFragment : Fragment() {
             .setSourceLanguage(TranslateLanguage.fromLanguageTag(fromInputText.text.toString()))
             .setTargetLanguage(TranslateLanguage.fromLanguageTag(toInputText.text.toString()))
             .build()
-        englishTurkishTranslator = Translation.getClient(options)
+        translator = Translation.getClient(options)
         conditions = DownloadConditions.Builder()
             .requireWifi()
             .build()
-        englishTurkishTranslator.downloadModelIfNeeded(conditions)
+        translator.downloadModelIfNeeded(conditions)
             .addOnSuccessListener {
                 // Model downloaded successfully. Okay to start translating.
                 // (Set a flag, unhide the translation UI, etc.)
@@ -103,13 +99,13 @@ class AddFragment : Fragment() {
                 // Model couldn’t be downloaded or other internal error.
                 // ...
             }
-        trWordString = addWordText.text.toString()
-        englishTurkishTranslator.translate(trWordString)
+        fromWordString = addWordText.text.toString()
+        translator.translate(fromWordString)
             .addOnSuccessListener { translatedText ->
                 // Translation successful.
-                enWordString = translatedText
-                if(inputCheck(trWordString,enWordString)){
-                    val Word = Word(0,trWordString,enWordString)
+                toWordString = translatedText
+                if(inputCheck(fromWordString,toWordString)){
+                    val Word = Word(0,fromWordString,toWordString,fromInputText.text.toString(),toInputText.text.toString())
                     mWordViewModel.addWord(Word)
                     Toast.makeText(requireContext(), "Successfully added!", Toast.LENGTH_SHORT).show()
                     findNavController().navigate(R.id.action_addFragment_to_listFragment)
@@ -120,7 +116,7 @@ class AddFragment : Fragment() {
                 }
             }
             .addOnFailureListener { exception ->
-                infoText.text ="error"
+                infoText.text ="Downloading please waiting"
             }
         val imm: InputMethodManager =
             requireActivity().getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -138,11 +134,11 @@ class AddFragment : Fragment() {
             .setSourceLanguage(TranslateLanguage.fromLanguageTag(fromInputText.text.toString()))
             .setTargetLanguage(TranslateLanguage.fromLanguageTag(toInputText.text.toString()))
             .build()
-        englishTurkishTranslator = Translation.getClient(options)
+        translator = Translation.getClient(options)
         conditions = DownloadConditions.Builder()
             .requireWifi()
             .build()
-        englishTurkishTranslator.downloadModelIfNeeded(conditions)
+        translator.downloadModelIfNeeded(conditions)
             .addOnSuccessListener {
                 // Model downloaded successfully. Okay to start translating.
                 // (Set a flag, unhide the translation UI, etc.)
@@ -151,12 +147,12 @@ class AddFragment : Fragment() {
                 // Model couldn’t be downloaded or other internal error.
                 // ...
             }
-        trWordString = addWordText.text.toString()
-        englishTurkishTranslator.translate(trWordString)
+        fromWordString = addWordText.text.toString()
+        translator.translate(fromWordString)
             .addOnSuccessListener { translatedText ->
                 // Translation successful.
                 infoText.text ="${translatedText}"
-                enWordString = translatedText
+                toWordString = translatedText
             }
             .addOnFailureListener { exception ->
                 infoText.text ="error"

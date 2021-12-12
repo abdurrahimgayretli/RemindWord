@@ -5,6 +5,10 @@
         <item>tr</item>
         <item>en</item>
         <item>es</item>
+        <item>de</item>
+        <item>fr</item>
+        <item>it</item>
+        <item>ru</item>
     </string-array>
 
 </resources>

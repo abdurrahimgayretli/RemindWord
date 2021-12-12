@@ -4,8 +4,10 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
@@ -17,7 +19,9 @@ import com.negotium.remindword.viewmodel.WordViewModel
 import com.google.mlkit.common.model.DownloadConditions
 import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.Translation
+import com.google.mlkit.nl.translate.Translator
 import com.google.mlkit.nl.translate.TranslatorOptions
+import com.jwang123.flagkit.FlagKit
 import kotlinx.android.synthetic.main.fragment_add.*
 import kotlinx.android.synthetic.main.fragment_update.*
 import kotlinx.android.synthetic.main.fragment_update.view.*
@@ -26,28 +30,89 @@ import kotlinx.android.synthetic.main.fragment_update.view.*
 class UpdateFragment : Fragment() {
 
     private val args by navArgs<UpdateFragmentArgs>()
-    var englishWord = ""
-    var turkishWord = ""
+    var fromWord = ""
+    var toWord = ""
+    private lateinit var conditions: DownloadConditions
+    private lateinit var translator: Translator
+    private lateinit var options: TranslatorOptions
     private lateinit var mWordViewModel: WordViewModel
-
-    val options = TranslatorOptions.Builder()
-        .setSourceLanguage(TranslateLanguage.ENGLISH)
-        .setTargetLanguage(TranslateLanguage.TURKISH)
-        .build()
-    val englishTurkishTranslator = Translation.getClient(options)
-    var conditions = DownloadConditions.Builder()
-        .requireWifi()
-        .build()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
         val view =  inflater.inflate(R.layout.fragment_update, container, false)
-
         mWordViewModel = ViewModelProvider(this).get(WordViewModel::class.java)
+        view.updateAddWordText.setText(args.currentWord.fromWord)
+        var languages1 = resources.getStringArray(R.array.languages)
+        var languages2 = resources.getStringArray(R.array.languages)
 
-        englishTurkishTranslator.downloadModelIfNeeded(conditions)
+        var arrayAdapter1 = ArrayAdapter(requireContext(),R.layout.dropdown_item,languages1)
+        var arrayAdapter2 = ArrayAdapter(requireContext(),R.layout.dropdown_item,languages2)
+
+        if(args.currentWord.fromFlag == "en"){
+            var fromFlag = FlagKit.drawableWithFlag(requireContext(),"gb")
+            view.updateFromImage.setImageDrawable(fromFlag)
+        }else{
+            var fromFlag = FlagKit.drawableWithFlag(requireContext(),args.currentWord.fromFlag)
+            view.updateFromImage.setImageDrawable(fromFlag)
+        }
+        if(args.currentWord.toFlag == "en"){
+            var toFlag = FlagKit.drawableWithFlag(requireContext(),"gb")
+            view.updateToImage.setImageDrawable(toFlag)
+        }else{
+            var toFlag = FlagKit.drawableWithFlag(requireContext(),args.currentWord.toFlag)
+            view.updateToImage.setImageDrawable(toFlag)
+        }
+
+
+        view.updateFromInputText.setOnItemClickListener { adapterView, view1, i, l ->
+            if(view.updateFromInputText.text.toString() == "en"){
+                var fromFlag = FlagKit.drawableWithFlag(requireContext(),"gb")
+                updateFromImage.setImageDrawable(fromFlag)
+            }else{
+                var fromFlag = FlagKit.drawableWithFlag(requireContext(),view.updateFromInputText.text.toString())
+                updateFromImage.setImageDrawable(fromFlag)
+            }
+
+        }
+        view.updateToInputText.setOnItemClickListener() { adapterView, view1, i, l ->
+            if(view.updateToInputText.text.toString() == "en"){
+                var toFlag = FlagKit.drawableWithFlag(requireContext(),"gb")
+                updateToImage.setImageDrawable(toFlag)
+            }
+            else{
+                var toFlag = FlagKit.drawableWithFlag(requireContext(),view.updateToInputText.text.toString())
+                updateToImage.setImageDrawable(toFlag)
+            }
+        }
+        view.updateFromInputText.setText(args.currentWord.fromFlag)
+        view.updateToInputText.setText(args.currentWord.toFlag)
+        view.updateFromInputText.setAdapter(arrayAdapter1)
+        view.updateToInputText.setAdapter(arrayAdapter2)
+
+
+
+
+
+
+        view.updateTranslateWordButton.setOnClickListener{ translateWord() }
+        view.updateWordButton.setOnClickListener{ updateItem() }
+
+        setHasOptionsMenu(true)
+
+        return view
+    }
+    fun translateWord(){
+        options = TranslatorOptions.Builder()
+            .setSourceLanguage(TranslateLanguage.fromLanguageTag(updateFromInputText.text.toString()))
+            .setTargetLanguage(TranslateLanguage.fromLanguageTag(updateToInputText.text.toString()))
+            .build()
+        translator = Translation.getClient(options)
+        conditions = DownloadConditions.Builder()
+            .requireWifi()
+            .build()
+        translator.downloadModelIfNeeded(conditions)
             .addOnSuccessListener {
                 // Model downloaded successfully. Okay to start translating.
                 // (Set a flag, unhide the translation UI, etc.)
@@ -56,26 +121,15 @@ class UpdateFragment : Fragment() {
                 // Model couldn’t be downloaded or other internal error.
                 // ...
             }
-
-        view.updateAddWordText.setText(args.currentWord.englishWord)
-
-        view.updateTranslateWordButton.setOnClickListener{ translateWord() }
-        view.updateAddWordButton.setOnClickListener{ updateItem() }
-
-        setHasOptionsMenu(true)
-
-        return view
-    }
-    fun translateWord(){
-        turkishWord = updateAddWordText.text.toString()
-        englishTurkishTranslator.translate(turkishWord)
+        toWord = updateAddWordText.text.toString()
+        translator.translate(toWord)
             .addOnSuccessListener { translatedText ->
                 // Translation successful.
                 updateInfoText.text ="${translatedText}"
-                englishWord = translatedText
+                fromWord = translatedText
             }
             .addOnFailureListener { exception ->
-                infoText.text ="error"
+                infoText.text ="Downloading please waiting"
             }
         val imm: InputMethodManager =
             requireActivity().getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -90,14 +144,30 @@ class UpdateFragment : Fragment() {
         imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
     private fun updateItem(){
-
-        turkishWord = updateAddWordText.text.toString()
-        englishTurkishTranslator.translate(turkishWord)
+        options = TranslatorOptions.Builder()
+            .setSourceLanguage(TranslateLanguage.fromLanguageTag(updateFromInputText.text.toString()))
+            .setTargetLanguage(TranslateLanguage.fromLanguageTag(updateToInputText.text.toString()))
+            .build()
+        translator = Translation.getClient(options)
+        conditions = DownloadConditions.Builder()
+            .requireWifi()
+            .build()
+        translator.downloadModelIfNeeded(conditions)
+            .addOnSuccessListener {
+                // Model downloaded successfully. Okay to start translating.
+                // (Set a flag, unhide the translation UI, etc.)
+            }
+            .addOnFailureListener { exception ->
+                // Model couldn’t be downloaded or other internal error.
+                // ...
+            }
+        fromWord = updateAddWordText.text.toString()
+        translator.translate(fromWord)
             .addOnSuccessListener { translatedText ->
                 // Translation successful.
-                englishWord = translatedText
-                if(inputCheck(turkishWord,englishWord)){
-                    val updateWord = Word(args.currentWord.id,turkishWord,englishWord)
+                toWord = translatedText
+                if(inputCheck(toWord,fromWord)){
+                    val updateWord = Word(args.currentWord.id,fromWord,toWord,updateFromInputText.text.toString(),updateToInputText.text.toString())
                     mWordViewModel.updateWord(updateWord)
                     Toast.makeText(requireContext(), "Updated Succesfully!", Toast.LENGTH_SHORT).show()
                     findNavController().navigate(R.id.action_updateFragment_to_listFragment)
@@ -141,13 +211,13 @@ class UpdateFragment : Fragment() {
         val builder = AlertDialog.Builder(requireContext())
         builder.setPositiveButton("Yes"){_,_ ->
             mWordViewModel.deleteWord(args.currentWord)
-            Toast.makeText(requireContext(), "Successfully removed: ${args.currentWord.turkishWord}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Successfully removed: ${args.currentWord.toWord}", Toast.LENGTH_SHORT).show()
 
             findNavController().navigate(R.id.action_updateFragment_to_listFragment)
         }
         builder.setNegativeButton("No"){_,_ -> }
-        builder.setTitle("Delete ${args.currentWord.turkishWord}?")
-        builder.setMessage("Are you sure you want to delete ${args.currentWord.turkishWord}?")
+        builder.setTitle("Delete ${args.currentWord.toWord}?")
+        builder.setMessage("Are you sure you want to delete ${args.currentWord.toWord}?")
         builder.create().show()
     }
 }

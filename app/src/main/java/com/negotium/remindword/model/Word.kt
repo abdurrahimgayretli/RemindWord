@@ -10,6 +10,8 @@ import kotlinx.android.parcel.Parcelize
 data class Word (
     @PrimaryKey(autoGenerate = true)
     val id: Int,
-    val englishWord: String,
-    val turkishWord: String
+    val fromWord: String,
+    val toWord: String,
+    val fromFlag: String,
+    val toFlag: String
 ): Parcelable
