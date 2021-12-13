@@ -88,16 +88,12 @@ class AddFragment : Fragment() {
             .build()
         translator = Translation.getClient(options)
         conditions = DownloadConditions.Builder()
-            .requireWifi()
             .build()
         translator.downloadModelIfNeeded(conditions)
             .addOnSuccessListener {
-                // Model downloaded successfully. Okay to start translating.
-                // (Set a flag, unhide the translation UI, etc.)
             }
             .addOnFailureListener { exception ->
-                // Model couldn’t be downloaded or other internal error.
-                // ...
+                Toast.makeText(requireContext(), "Please open  your wifi", Toast.LENGTH_SHORT).show()
             }
         fromWordString = addWordText.text.toString()
         translator.translate(fromWordString)
@@ -116,7 +112,7 @@ class AddFragment : Fragment() {
                 }
             }
             .addOnFailureListener { exception ->
-                infoText.text ="Downloading please waiting"
+                Toast.makeText(requireContext(), "Downloading please waiting", Toast.LENGTH_SHORT).show()
             }
         val imm: InputMethodManager =
             requireActivity().getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -136,16 +132,12 @@ class AddFragment : Fragment() {
             .build()
         translator = Translation.getClient(options)
         conditions = DownloadConditions.Builder()
-            .requireWifi()
             .build()
         translator.downloadModelIfNeeded(conditions)
             .addOnSuccessListener {
-                // Model downloaded successfully. Okay to start translating.
-                // (Set a flag, unhide the translation UI, etc.)
             }
             .addOnFailureListener { exception ->
-                // Model couldn’t be downloaded or other internal error.
-                // ...
+                Toast.makeText(requireContext(), "Please open  your wifi", Toast.LENGTH_SHORT).show()
             }
         fromWordString = addWordText.text.toString()
         translator.translate(fromWordString)
@@ -155,7 +147,7 @@ class AddFragment : Fragment() {
                 toWordString = translatedText
             }
             .addOnFailureListener { exception ->
-                infoText.text ="error"
+                Toast.makeText(requireContext(), "Downloading please waiting", Toast.LENGTH_SHORT).show()
             }
         val imm: InputMethodManager =
             requireActivity().getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager

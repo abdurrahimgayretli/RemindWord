@@ -79,7 +79,7 @@ class ListFragment : Fragment()  {
                 Toast.makeText(requireContext(), "Successfully removed notification!", Toast.LENGTH_SHORT).show()
             }
             else{
-                Toast.makeText(requireContext(), "Please added word!!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Please add word!!", Toast.LENGTH_SHORT).show()
             }
             data = settingDao.findByKey("Notification")
         }

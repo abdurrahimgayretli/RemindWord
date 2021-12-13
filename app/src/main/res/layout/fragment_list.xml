@@ -55,6 +55,8 @@
         android:hint="Enter interval (minute)"
         android:inputType="number"
         android:minHeight="48dp"
+        android:textColor="#000000"
+        android:textColorHint="#7A000000"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/recyclerView"
         app:layout_constraintEnd_toEndOf="@+id/recyclerView"
